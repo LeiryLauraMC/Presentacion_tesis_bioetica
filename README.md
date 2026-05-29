@@ -1,1 +1,2 @@
-# Presentacion_tesis_bioetica
+# 🖥️ Presentación de tesis - Bioética
+[Abrir diagrama]()
