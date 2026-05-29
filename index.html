@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ética en Investigación · Órtesis Patelofemoral</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nude-bg: #f5f0ea;
+    --nude-card: #faf7f3;
+    --ink: #2c2416;
+    --ink-soft: #5a5044;
+    --ink-faint: #9e9488;
+    --accent: #8b6e52;
+    --accent-light: #c4a882;
+    --accent-pale: #e8ddd0;
+    --line: #d8cfc4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--nude-bg);
+    font-family: 'Jost', sans-serif;
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* NAV — horizontal, pegada abajo */
+  nav {
+    position: fixed;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    z-index: 100;
+    background: rgba(245,240,234,0.88);
+    backdrop-filter: blur(6px);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+  }
+  nav button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-faint);
+    font-size: 13px;
+    line-height: 1;
+    padding: 2px 5px;
+    transition: color 0.2s;
+  }
+  nav button:hover { color: var(--accent); }
+  #slide-counter {
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    min-width: 32px;
+    text-align: center;
+    font-weight: 300;
+  }
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--line);
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .dot.active { background: var(--accent); }
+
+  /* SLIDES */
+  #slides-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 28px 64px 52px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .ornament {
+    width: 56px;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--accent-light), transparent);
+    margin: 8px auto;
+    flex-shrink: 0;
+  }
+
+  /* PORTADA */
+  .slide-cover {
+    background: var(--nude-card);
+    text-align: center;
+  }
+  .slide-cover .overline {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .slide-cover h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 3.8vw, 3.4rem);
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--ink);
+    max-width: 800px;
+    margin: 0 auto 8px;
+  }
+  .slide-cover h1 em { font-style: italic; color: var(--accent); }
+  .slide-cover .sub {
+    font-size: 16px;
+    color: var(--ink-soft);
+    font-weight: 300;
+    margin-top: 14px;
+    line-height: 1.8;
+  }
+  .slide-cover .meta {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-top: 24px;
+    font-weight: 300;
+  }
+
+  /* BODY SLIDES */
+  .slide-body {
+    width: 100%;
+    max-width: 1000px;
+  }
+  .slide-label {
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .slide-label::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+    background: var(--accent-light);
+  }
+  .slide-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.9rem, 2.8vw, 2.6rem);
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  .slide-title em { font-style: italic; color: var(--accent); }
+
+  .content-text {
+    font-size: 15.5px;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--ink-soft);
+  }
+
+  .card-grid { display: grid; gap: 10px; margin-top: 14px; }
+  .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--nude-card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 14px 16px;
+  }
+  .card.accent-top { border-top: 2px solid var(--accent-light); }
+  .card-head {
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .card p {
+    font-size: 14.5px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .highlight-box {
+    background: var(--accent-pale);
+    border-left: 2px solid var(--accent);
+    padding: 13px 18px;
+    border-radius: 0 3px 3px 0;
+    margin-top: 14px;
+  }
+  .highlight-box p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+
+  .obj-list { margin-top: 14px; display: flex; flex-direction: column; gap: 9px; }
+  .obj-item { display: flex; gap: 14px; align-items: flex-start; }
+  .obj-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--accent-light);
+    line-height: 1;
+    min-width: 22px;
+  }
+  .obj-text {
+    font-size: 14.5px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    padding-top: 2px;
+  }
+
+  .steps {
+    display: flex;
+    gap: 0;
+    margin-top: 20px;
+    position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 19px;
+    left: 28px;
+    right: 28px;
+    height: 1px;
+    background: var(--line);
+  }
+  .step { flex: 1; text-align: center; padding: 0 6px; position: relative; }
+  .step-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--accent-light);
+    background: var(--nude-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    position: relative;
+    z-index: 1;
+  }
+  .step-title {
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  .step-desc {
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .norm-table { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+  .norm-row {
+    display: grid;
+    grid-template-columns: 175px 1fr;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--nude-card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    align-items: start;
+  }
+  .norm-tag {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    line-height: 1.5;
+  }
+  .norm-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px; align-items: start; }
+  .div-line { width: 100%; height: 1px; background: var(--line); margin: 12px 0; }
+  svg.icon { flex-shrink: 0; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<div id="slides-wrapper">
+
+  <!-- ═══ SLIDE 1 · PORTADA ═══ -->
+  <div class="slide slide-cover active" id="s1">
+    <div class="overline">Ética en la Medicina · Universidad del Norte</div>
+    <h1>Diseño y Validación Biomecánica de <em>Órtesis Patelofemoral</em> Personalizada</h1>
+    <div class="ornament"></div>
+    <p class="sub">mediante Modelación Computacional<br>Maestría en Ingeniería Biomédica</p>
+    <p class="meta">Leiry Laura Mares Cure &nbsp;·&nbsp; 2026</p>
+  </div>
+
+  <!-- ═══ SLIDE 2 · CONTEXTO ═══ -->
+  <div class="slide" id="s2">
+    <div class="slide-body">
+      <div class="slide-label">Contexto de la investigación</div>
+      <h2 class="slide-title">La articulación patelofemoral y su <em>relevancia clínica</em></h2>
+      <div class="ornament"></div>
+      <div class="two-col">
+        <div>
+          <p class="content-text">El síndrome de dolor patelofemoral (SDPF) representa entre el 11 y el 17% de todas las consultas por dolor de rodilla en atención primaria. Afecta principalmente a mujeres jóvenes y personas físicamente activas, y cuando no se trata adecuadamente puede derivar en artrosis patelofemoral crónica.</p>
+          <div class="div-line"></div>
+          <p class="content-text">Las órtesis patelofemorales disponibles en el mercado son genéricas: diseñadas para el promedio de la población, no para la anatomía individual de cada paciente. Esa heterogeneidad anatómica explica por qué la respuesta clínica a un mismo dispositivo varía significativamente entre personas.</p>
+        </div>
+        <div>
+          <div class="card accent-top">
+            <div class="card-head">
+              <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#8b6e52" stroke-width="1"/><path d="M6.5 4v3.5l2 1.2" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/></svg>
+              Problema central
+            </div>
+            <p>No existe actualmente un flujo validado para el diseño personalizado y la evaluación biomecánica computacional de órtesis patelofemorales articuladas con mecanismo policéntrico adaptado al usuario.</p>
+          </div>
+          <div class="card accent-top" style="margin-top:10px">
+            <div class="card-head">
+              <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="10" height="10" rx="2" stroke="#8b6e52" stroke-width="1"/><path d="M4.5 6.5h4M6.5 4.5v4" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/></svg>
+              Propuesta
+            </div>
+            <p>Integrar escaneo 3D, modelación musculoesquelética (OpenSim), análisis de elementos finitos y manufactura aditiva en un proceso de diseño y validación sujeto-específico.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3 · PLANTEAMIENTO ═══ -->
+  <div class="slide" id="s3">
+    <div class="slide-body">
+      <div class="slide-label">Planteamiento del problema</div>
+      <h2 class="slide-title">Una brecha entre la <em>evidencia clínica</em> y el diseño actual</h2>
+      <div class="ornament"></div>
+      <p class="content-text">La revisión Cochrane de Callaghan y Selfe (2012) identificó que ningún ensayo clínico disponible ha medido cambios cinemáticos ni cinéticos durante el uso de órtesis patelofemoral. Los estudios evalúan si el paciente refiere menos dolor, pero no si la órtesis modifica efectivamente la mecánica articular. Esta brecha metodológica justifica abordar el problema desde la modelación computacional antes de la fabricación.</p>
+      <div class="highlight-box">
+        <p>¿Puede una órtesis patelofemoral personalizada, diseñada mediante modelación biomecánica computacional, reducir las cargas articulares estimadas durante tareas funcionales sin alterar significativamente la cinemática natural ni la activación muscular del cuádriceps?</p>
+      </div>
+      <div class="card-grid cols-2">
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5 L5.5 10 L11 3" stroke="#8b6e52" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Necesidad identificada
+          </div>
+          <p>Dispositivos que respondan a la variabilidad anatómica individual, especialmente en poblaciones con displasia troclear o malalineación patelar significativa.</p>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#8b6e52" stroke-width="1"/><path d="M6.5 4v2.5l1.8 1.8" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/></svg>
+            Pertinencia de la solución
+          </div>
+          <p>La modelación computacional permite optimizar el dispositivo antes de fabricarlo, reduciendo iteraciones de prototipado y la exposición de participantes a dispositivos no validados.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4 · JUSTIFICACIÓN ═══ -->
+  <div class="slide" id="s4">
+    <div class="slide-body">
+      <div class="slide-label">Justificación</div>
+      <h2 class="slide-title">Relevancia científica, social y <em>ética</em> del proyecto</h2>
+      <div class="ornament"></div>
+      <div class="card-grid cols-3">
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5 L8 5 L12 5.5 L9 8.5 L9.8 12 L6.5 10.3 L3.2 12 L4 8.5 L1 5.5 L5 5Z" stroke="#8b6e52" stroke-width="1" fill="none"/></svg>
+            Científica
+          </div>
+          <p>Genera evidencia cuantitativa sobre la modificación de cargas articulares internas, dato inaccesible sin instrumentación invasiva. Aporta a una línea de investigación con escasa bibliografía específica en órtesis patelofemoral.</p>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 2 C4 2 2 4 2 6.5 C2 9 4 11 6.5 11 C9 11 11 9 11 6.5 C11 4 9 2 6.5 2Z" stroke="#8b6e52" stroke-width="1" fill="none"/><path d="M6.5 5 v3 M5 6.5 h3" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/></svg>
+            Social
+          </div>
+          <p>El SDPF afecta principalmente a mujeres jóvenes en edad productiva y atletas. Un dispositivo más efectivo, fabricado en manufactura aditiva, podría ampliar el acceso a tratamiento ortésico personalizado en Colombia.</p>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5 L6.5 11.5 M2 4 L6.5 1.5 L11 4" stroke="#8b6e52" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Ética
+          </div>
+          <p>Al priorizar la validación computacional sobre la experimentación directa en pacientes, se minimizan los riesgos de exposición a dispositivos no optimizados, respetando el principio de no maleficencia.</p>
+        </div>
+      </div>
+      <div class="div-line"></div>
+      <p class="content-text">La viabilidad técnica está sustentada en el acceso a OpenSim (código abierto), herramientas CAD y FEA disponibles en la institución, y tecnología de manufactura aditiva de bajo costo. La viabilidad ética se fundamenta en que la primera fase del estudio es completamente computacional, sin intervención directa en participantes.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5 · HIPÓTESIS ═══ -->
+  <div class="slide" id="s5">
+    <div class="slide-body">
+      <div class="slide-label">Hipótesis de investigación</div>
+      <h2 class="slide-title">La tesis que se busca <em>demostrar</em></h2>
+      <div class="ornament"></div>
+      <div class="highlight-box" style="margin-top:16px">
+        <p>Una órtesis patelofemoral personalizada, optimizada mediante modelación biomecánica multibody, reduce los momentos articulares patelofemorales estimados en tareas funcionales (escaleras y sentadilla), sin generar restricciones significativas en el rango de movimiento ni disminución relevante en la activación muscular del cuádriceps respecto a la condición sin órtesis.</p>
+      </div>
+      <div class="two-col" style="margin-top:16px">
+        <div class="card">
+          <div class="card-head">Variable independiente</div>
+          <p>Configuración geométrica y propiedades mecánicas de la órtesis patelofemoral personalizada: articulación policéntrica tipo mecanismo de cuatro barras, material y rigidez estructural.</p>
+        </div>
+        <div class="card">
+          <div class="card-head">Variables dependientes</div>
+          <p>Momentos articulares patelofemorales estimados, rango de movimiento de la rodilla y nivel de activación muscular del cuádriceps durante escaleras y sentadilla.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6 · OBJETIVOS ═══ -->
+  <div class="slide" id="s6">
+    <div class="slide-body">
+      <div class="slide-label">Objetivos</div>
+      <h2 class="slide-title">Propósito <em>general</em> y alcances específicos</h2>
+      <div class="ornament"></div>
+      <div class="card" style="margin-top:12px; border-left: 2px solid var(--accent); padding-left: 18px;">
+        <div class="card-head">Objetivo general</div>
+        <p>Diseñar y validar biomecánicamente, mediante modelación computacional, una órtesis patelofemoral personalizada que reduzca las cargas articulares estimadas durante tareas funcionales sin comprometer la cinemática natural ni la activación muscular del cuádriceps.</p>
+      </div>
+      <div class="obj-list">
+        <div class="obj-item">
+          <span class="obj-num">01</span>
+          <p class="obj-text">Construir un modelo musculoesquelético sujeto-específico de la rodilla con representación patelofemoral, validado frente a datos cinemáticos y cinéticos experimentales del participante.</p>
+        </div>
+        <div class="obj-item">
+          <span class="obj-num">02</span>
+          <p class="obj-text">Diseñar la geometría de la órtesis personalizada integrando escaneo 3D del miembro, síntesis del mecanismo policéntrico basada en el centro instantáneo de rotación anatómico y modelación CAD.</p>
+        </div>
+        <div class="obj-item">
+          <span class="obj-num">03</span>
+          <p class="obj-text">Validar estructuralmente el prototipo mediante análisis de elementos finitos y evaluar su efecto biomecánico comparando la condición con y sin órtesis en el modelo computacional.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7 · METODOLOGÍA ═══ -->
+  <div class="slide" id="s7">
+    <div class="slide-body">
+      <div class="slide-label">Metodología</div>
+      <h2 class="slide-title">Flujo de trabajo <em>computacional</em> integrado</h2>
+      <div class="ornament"></div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-circle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2 L8 14 M4 6 L8 2 L12 6" stroke="#8b6e52" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <p class="step-title">Captura de datos</p>
+          <p class="step-desc">Análisis 3D de marcha, plataformas de fuerza y escaneo de superficie del miembro</p>
+        </div>
+        <div class="step">
+          <div class="step-circle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="1.5" stroke="#8b6e52" stroke-width="1.1" fill="none"/><path d="M6 8 h4 M8 6 v4" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/></svg>
+          </div>
+          <p class="step-title">Modelo MSK</p>
+          <p class="step-desc">Cinemática inversa, dinámica inversa y estimación de fuerzas musculares en OpenSim</p>
+        </div>
+        <div class="step">
+          <div class="step-circle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#8b6e52" stroke-width="1" fill="none"/><path d="M5.5 8 Q8 5 10.5 8 Q8 11 5.5 8Z" stroke="#8b6e52" stroke-width="1" fill="none"/></svg>
+          </div>
+          <p class="step-title">Diseño CAD</p>
+          <p class="step-desc">Síntesis del mecanismo policéntrico (CIR) y modelado sobre geometría anatómica</p>
+        </div>
+        <div class="step">
+          <div class="step-circle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 13 L3 6 L8 3 L13 6 L13 13Z" stroke="#8b6e52" stroke-width="1.1" fill="none"/><path d="M3 6 L8 9 L13 6" stroke="#8b6e52" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M8 9 L8 13" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/></svg>
+          </div>
+          <p class="step-title">FEA</p>
+          <p class="step-desc">Validación estructural e identificación de zonas críticas de estrés mecánico</p>
+        </div>
+        <div class="step">
+          <div class="step-circle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 12 L4 4 M12 12 L12 4 M4 8 L12 8" stroke="#8b6e52" stroke-width="1.1" stroke-linecap="round"/><path d="M2 12 h12" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/></svg>
+          </div>
+          <p class="step-title">Evaluación</p>
+          <p class="step-desc">Comparación con y sin órtesis: momentos articulares, rango de movimiento, activación muscular</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <p style="font-size:14px; font-weight:300; color:var(--ink-soft); line-height:1.7">La primera fase del estudio es completamente virtual. La captura de datos biomecánicos con participantes humanos solo se realizará en la segunda etapa, bajo protocolo aprobado por el Comité de Ética Institucional de la Universidad del Norte, conforme a los lineamientos de la Resolución 8430 de 1993.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8 · CONSIDERACIONES ÉTICAS — MARCO NORMATIVO ═══ -->
+  <div class="slide" id="s8">
+    <div class="slide-body">
+      <div class="slide-label">Consideraciones éticas</div>
+      <h2 class="slide-title">Marco normativo <em>nacional e internacional</em></h2>
+      <div class="ornament"></div>
+      <div class="norm-table">
+        <div class="norm-row">
+          <span class="norm-tag">Resolución 8430/1993<br>Colombia</span>
+          <p class="norm-desc">Normas científicas, técnicas y administrativas para investigación en salud. La investigación se clasifica como de <em>riesgo mínimo</em> (captura de movimiento superficial, no invasiva). Requiere consentimiento informado, aprobación del CEI y protección de datos del participante.</p>
+        </div>
+        <div class="norm-row">
+          <span class="norm-tag">Ley 1581/2012<br>Colombia</span>
+          <p class="norm-desc">Régimen de protección de datos personales. Los datos cinemáticos y de imagen corporal recolectados en la fase experimental son datos personales sujetos a esta ley: finalidad definida, consentimiento explícito y derecho de habeas data.</p>
+        </div>
+        <div class="norm-row">
+          <span class="norm-tag">Declaración de Helsinki<br>AMM · 2013</span>
+          <p class="norm-desc">Principios éticos para investigación con seres humanos. Fundamenta los requerimientos de beneficencia, no maleficencia, respeto a la autonomía y justicia que rigen el protocolo de captura de datos biomecánicos.</p>
+        </div>
+        <div class="norm-row">
+          <span class="norm-tag">ASME V&V 40-2018</span>
+          <p class="norm-desc">Marco metodológico para verificación y validación de modelos computacionales en dispositivos médicos. Establece la responsabilidad del investigador de documentar la credibilidad del modelo antes de utilizarlo para decisiones de diseño clínico.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9 · CONSIDERACIONES ÉTICAS — PRINCIPIOS ═══ -->
+  <div class="slide" id="s9">
+    <div class="slide-body">
+      <div class="slide-label">Consideraciones éticas</div>
+      <h2 class="slide-title">Principios bioéticos aplicados al <em>diseño del estudio</em></h2>
+      <div class="ornament"></div>
+      <div class="card-grid cols-2">
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 2 C4.5 2 2 4 2 6.5 C2 9 4 11 6.5 11" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/><path d="M8 7.5 L10 11 L13 7" stroke="#8b6e52" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Beneficencia y no maleficencia
+          </div>
+          <p>La validación computacional precede cualquier contacto con participantes, asegurando que el dispositivo que llegue a pruebas físicas sea estructuralmente seguro. Se evita exponer a personas a prototipos no optimizados.</p>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5 L6.5 11.5" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/><path d="M2 4 L6.5 1.5 L11 4 L11 9 L6.5 11.5 L2 9Z" stroke="#8b6e52" stroke-width="1" fill="none"/></svg>
+            Autonomía
+          </div>
+          <p>Los participantes en la captura de datos biomecánicos recibirán información completa sobre los procedimientos, riesgos y beneficios. La participación es voluntaria y podrán retirarse en cualquier momento sin consecuencias.</p>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5 h9 M8 4 L11 6.5 L8 9" stroke="#8b6e52" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Justicia
+          </div>
+          <p>Los criterios de inclusión y exclusión de participantes se definirán con base en criterios clínicos y biomecánicos objetivos, sin discriminación por género, condición socioeconómica o etnia.</p>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <svg class="icon" width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="3" width="9" height="7" rx="1" stroke="#8b6e52" stroke-width="1" fill="none"/><path d="M5 3 V2 M8 3 V2" stroke="#8b6e52" stroke-width="1" stroke-linecap="round"/><path d="M4.5 6.5 h4" stroke="#8b6e52" stroke-width="0.8" stroke-linecap="round"/></svg>
+            Consentimiento informado
+          </div>
+          <p>Se elaborará un formulario de consentimiento conforme a la Resolución 8430/1993, con lenguaje accesible, detalles del procedimiento de captura de movimiento y política de protección de datos personales (Ley 1581/2012).</p>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p>La investigación será sometida a evaluación y aprobación del Comité de Ética Institucional de la Universidad del Norte antes del inicio de cualquier fase experimental con participantes humanos.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10 · CIERRE ═══ -->
+  <div class="slide slide-cover" id="s10">
+    <h1 style="font-size: clamp(1.9rem, 3.2vw, 3rem); max-width: 700px; font-weight: 300">
+      Diseñar con rigor ético no es un requisito formal<br><em>es la única manera responsable de hacer ciencia.</em>
+    </h1>
+    <div class="ornament" style="margin-top: 24px"></div>
+    <p class="meta" style="margin-top: 20px">Leiry Laura Mares Cure &nbsp;·&nbsp; Maestría en Ingeniería Biomédica &nbsp;·&nbsp; Universidad del Norte &nbsp;·&nbsp; 2026</p>
+  </div>
+
+</div><!-- /slides-wrapper -->
+
+<!-- NAV horizontal -->
+<nav id="main-nav">
+  <button id="btn-prev">&#8592;</button>
+  <div id="dots" style="display:flex; flex-direction:row; align-items:center; gap:5px;"></div>
+  <span id="slide-counter">1 / 10</span>
+  <button id="btn-next">&#8594;</button>
+</nav>
+
+<script>
+  const total = 10;
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dots');
+  const counter = document.getElementById('slide-counter');
+
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(d);
+  }
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    document.querySelectorAll('.dot')[current].classList.remove('active');
+    current = (n + total) % total;
+    slides[current].classList.add('active');
+    document.querySelectorAll('.dot')[current].classList.add('active');
+    counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1));
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+  });
+</script>
+</body>
+</html>
